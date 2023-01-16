@@ -1,0 +1,12 @@
+variables:
+  GIT_STRATEGY: clone
+  GIT_CHECKOUT: "true"
+ 
+
+check:
+  image: cache-ili.univ-artois.fr/proxy_cache/library/eclipse-temurin:11-alpine
+  stage: build
+  script: 
+      - "javac -d bin src/*.java"
+  tags: 
+     - docker
