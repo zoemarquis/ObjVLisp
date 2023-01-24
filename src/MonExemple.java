@@ -4,7 +4,7 @@ import java.util.Map;
 public class MonExemple {
 
     public static void exempleMarquis() {
-        ObjVlisp obj = ObjVlispFabrique.nouveau();
+        ObjVLisp obj = ObjVLispFabrique.nouveau();
         OObjet metaClass = obj.getClasse("Classe");
         OObjet systemClass = obj.getClasse("Systeme");
 
@@ -16,7 +16,7 @@ public class MonExemple {
         // 12 minutes de cuisson par oeuf
 
         OObjet classCrepe = metaClass.message(":nouveau", Map.of("nomClasse", "Crepe",
-                "superClasse", classCrepe, "nomsAttributs", List.of("rhum")));
+                "superClasse", classDessert, "nomsAttributs", List.of("rhum")));
         classCrepe.message(":message", "modeCuisson", (Message) (o, a) -> "Poele");
         classCrepe.message(":message", "tempsCuisson", (Message) (o, a) -> 2);
 
@@ -63,6 +63,7 @@ public class MonExemple {
         systemClass.message("afficher", (Object) monMarbre.message("degreCuisson"));
         systemClass.message("afficher", (Object) monMarbre.message("tempsCuisson"));
     }
+
 
     public static void exempleNulli() {
         ObjVLisp obj = ObjVLispFabrique.nouveau();
