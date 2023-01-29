@@ -3,66 +3,77 @@ import java.util.Map;
 
 public class MonExemple {
 
-    public static void exempleMarquis() {
-        ObjVLisp obj = ObjVLispFabrique.nouveau();
-        OObjet metaClass = obj.getClasse("Classe");
-        OObjet systemClass = obj.getClasse("Systeme");
+     public static void exempleMarquis() {
+                ObjVLisp obj = ObjVLispFabrique.nouveau();
+                OObjet metaClass = obj.getClasse("Classe");
+                OObjet systemClass = obj.getClasse("Systeme");
 
-        OObjet classDessert = metaClass.message(":nouveau", Map.of("nomClasse", "Dessert",
-                "nomsAttributs", List.of("sucre", "farine", "oeuf", "lait", "beurre")));
-        classDessert.message(":message", "modeCuisson", (Message) (o, a) -> "Four");
-        classDessert.message(":message", "tempsCuisson",
-                (Message) (o, a) -> (Integer) o.message("oeuf") * 12);
-        // 12 minutes de cuisson par oeuf
+                OObjet integerClass = obj.getClasse("Entier");
+                OObjet un = integerClass.message(":nouveau", 1);
+                OObjet deux = integerClass.message(":nouveau", 2);
+                OObjet trois = integerClass.message(":nouveau", 3);
+                OObjet quatre = integerClass.message(":nouveau", 4);
 
-        OObjet classCrepe = metaClass.message(":nouveau", Map.of("nomClasse", "Crepe",
-                "superClasse", classDessert, "nomsAttributs", List.of("rhum")));
-        classCrepe.message(":message", "modeCuisson", (Message) (o, a) -> "Poele");
-        classCrepe.message(":message", "tempsCuisson", (Message) (o, a) -> 2);
+                OObjet douze = integerClass.message(":nouveau", 12);
+                OObjet vingtCinq = integerClass.message(":nouveau", 25);
 
-        OObjet classGateau = metaClass.message(":nouveau", Map.of("nomClasse", "Gateau",
-                "superClasse", classDessert, "nomsAttributs", List.of("levure")));
-        classGateau.message(":message", "degreCuisson", (Message) (o, a) -> 180);
+                OObjet trente = integerClass.message(":nouveau", 30);
+                OObjet trenteTrois = integerClass.message(":nouveau", 33);
+                OObjet trenteNeuf = integerClass.message(":nouveau", 39);
+                OObjet quarante = integerClass.message(":nouveau", 40);
 
-        OObjet classMarbre = metaClass.message(":nouveau", Map.of("nomClasse", "Marbre",
-                "superClasse", classGateau, "nomsAttributs", List.of("chocolat")));
-        classMarbre.message(":message", "tempsCuisson",
-                (Message) (o, a) -> (Integer) o.superMessage("tempsCuisson") + 3);
+                OObjet centVingtCinq = integerClass.message(":nouveau", 125);
+                OObjet centQuatreVingt = integerClass.message(":nouveau", 180);
+                OObjet deuxCent = integerClass.message(":nouveau", 200);
 
-        OObjet mesCrepes = classCrepe.message("nouveau");
-        mesCrepes.message(":sucre", 30);
-        mesCrepes.message(":farine", 200);
-        mesCrepes.message(":oeuf", 2);
-        mesCrepes.message(":lait", 40);
-        mesCrepes.message(":beurre", 33);
-        mesCrepes.message(":rhum", 4);
+                OObjet classDessert = metaClass.message(":nouveau", Map.of("nomClasse", "Dessert",
+                                "nomsAttributs",
+                                List.of("sucre", "farine", "oeuf", "lait", "beurre")));
+                classDessert.message(":message", "tempsCuisson", (Message) (o,
+                                a) -> ((OObjet) o.message("oeuf")).message("*", (Object) douze));
+                // 12 minutes de cuisson par oeuf
 
-        OObjet monMarbre = classMarbre.message("nouveau");
-        mesCrepes.message(":sucre", 200);
-        mesCrepes.message(":farine", 200);
-        mesCrepes.message(":oeuf", 3);
-        mesCrepes.message(":lait", 12);
-        mesCrepes.message(":beurre", 125);
-        mesCrepes.message(":levure", 1);
-        mesCrepes.message(":chocolat", 25);
+                OObjet classCrepe = metaClass.message(":nouveau", Map.of("nomClasse", "Crepe",
+                                "superClasse", classDessert, "nomsAttributs", List.of("rhum")));
+                classCrepe.message(":message", "tempsCuisson", (Message) (o, a) -> deux);
 
-        OObjet integerClass = obj.getClasse("Entier");
-        OObjet deux = integerClass.message(":nouveau", 2);
-        OObjet trenteNeuf = integerClass.message(":nouveau", 39);
+                OObjet classGateau = metaClass.message(":nouveau", Map.of("nomClasse", "Gateau",
+                                "superClasse", classDessert, "nomsAttributs", List.of("levure")));
+                classGateau.message(":message", "degreCuisson",
+                                (Message) (o, a) -> centQuatreVingt);
 
-        Object tempsCrepe = mesCrepes.message("tempsCuisson");
-        assert deux.equals(tempsCrepe);
+                OObjet classMarbre = metaClass.message(":nouveau", Map.of("nomClasse", "Marbre",
+                                "superClasse", classGateau, "nomsAttributs", List.of("chocolat")));
+                classMarbre.message(":message", "tempsCuisson",
+                                (Message) (o, a) -> ((OObjet) o.superMessage("tempsCuisson"))
+                                                .message("+", (Object) trois));
 
-        Object tempsMarbre = monMarbre.message("tempsCuisson");
-        assert trenteNeuf.equals(tempsMarbre);
+                OObjet mesCrepes = classCrepe.message("nouveau");
+                mesCrepes.message(":sucre", trente);
+                mesCrepes.message(":farine", deuxCent);
+                mesCrepes.message(":oeuf", deux);
+                mesCrepes.message(":lait", quarante);
+                mesCrepes.message(":beurre", trenteTrois);
+                mesCrepes.message(":rhum", quatre);
 
-        systemClass.message("afficher", (Object) mesCrepes.message("modeCuisson"));
-        systemClass.message("afficher", (Object) monMarbre.message("tempsCuisson"));
+                OObjet monMarbre = classMarbre.message("nouveau");
+                mesCrepes.message(":sucre", deuxCent);
+                mesCrepes.message(":farine", deuxCent);
+                mesCrepes.message(":oeuf", trois);
+                mesCrepes.message(":lait", douze);
+                mesCrepes.message(":beurre", centVingtCinq);
+                mesCrepes.message(":levure", un);
+                mesCrepes.message(":chocolat", vingtCinq);
 
-        systemClass.message("afficher", (Object) monMarbre.message("modeCuisson"));
-        systemClass.message("afficher", (Object) monMarbre.message("degreCuisson"));
-        systemClass.message("afficher", (Object) monMarbre.message("tempsCuisson"));
-    }
+                Object tempsCrepe = mesCrepes.message("tempsCuisson");
+                assert deux.equals(tempsCrepe);
+                Object tempsMarbre = monMarbre.message("tempsCuisson");
+                assert trenteNeuf.equals(tempsMarbre);
+
+                systemClass.message("afficher", (Object) mesCrepes.message("tempsCuisson"));
+                systemClass.message("afficher", (Object) monMarbre.message("degreCuisson"));
+                systemClass.message("afficher", (Object) monMarbre.message("tempsCuisson"));
+        }
 
 
     public static void exempleNulli() {
