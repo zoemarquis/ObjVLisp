@@ -85,7 +85,7 @@ public class MonExemple {
             OObjet StringClass = obj.getClasse("Chaine");
     
             OObjet un = integerClass.message(":nouveau", 1);
-            OObjet cent = integerClass.message(":nouveau", 100);
+            OObjet mille = integerClass.message(":nouveau", 1000);
     
             OObjet nom_enzoString = StringClass.message(":nouveau", "Enzo");
             OObjet maleString = StringClass.message(":nouveau", "Mâle");
@@ -101,22 +101,22 @@ public class MonExemple {
              OObjet pterosaureClass = metaClass.message(":nouveau", Map.of("nomClasse", "Pterosaure",
                                     "superClasse", dinosaureClass, "nomsAttributs", List.of("vitesse_vol")));
     
-            OObjet enzoPterosaure = pterosaureClass.message("nouveau");
-            enzoPterosaure.message(":nom", nom_enzoString);
-            enzoPterosaure.message(":sexe", maleString);
-            enzoPterosaure.message(":taille", petitString);
-            enzoPterosaure.message(":poids", poidsString);
-            enzoPterosaure.message(":couleur", marronString);
-            enzoPterosaure.message(":vitesse_vol", v_volInteger);
+            OObjet enzoLeZigoto = pterosaureClass.message("nouveau");
+            enzoLeZigoto.message(":nom", nom_enzoString);
+            enzoLeZigoto.message(":sexe", maleString);
+            enzoLeZigoto.message(":taille", petitString);
+            enzoLeZigoto.message(":poids", poidsString);
+            enzoLeZigoto.message(":couleur", marronString);
+            enzoLeZigoto.message(":vitesse_vol", v_volInteger);
     
-            pterosaureClass.message(":message", "parcours1000km", (Message) (o, a) -> ((OObjet) cent
-            .message("/", (Object) o.message(":message", "vitesse_vol"))));
+            pterosaureClass.message(":message", "parcours1000km", (Message) (o, a) -> ((OObjet) mille
+            .message("/", (Object) o.message("message", "vitesse_vol"))));
             // Temps en H pour parcourir 1000km
     
-            Object vitesseEnzo = enzoPterosaure.message("parcours1000km");
+            Object vitesseEnzo = enzoLeZigoto.message("parcours1000km");
             assert un.equals(vitesseEnzo);
     
-            systemClass.message("afficher", (Object) enzoPterosaure.message("parcours1000km"));
+            systemClass.message("afficher", (Object) enzoLeZigoto.message("parcours1000km"));
     
         }
 
