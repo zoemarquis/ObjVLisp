@@ -57,13 +57,13 @@ public class MonExemple {
                 mesCrepes.message(":rhum", quatre);
 
                 OObjet monMarbre = classMarbre.message("nouveau");
-                mesCrepes.message(":sucre", deuxCent);
-                mesCrepes.message(":farine", deuxCent);
-                mesCrepes.message(":oeuf", trois);
-                mesCrepes.message(":lait", douze);
-                mesCrepes.message(":beurre", centVingtCinq);
-                mesCrepes.message(":levure", un);
-                mesCrepes.message(":chocolat", vingtCinq);
+                monMarbre.message(":sucre", deuxCent);
+                monMarbre.message(":farine", deuxCent);
+                monMarbre.message(":oeuf", trois);
+                monMarbre.message(":lait", douze);
+                monMarbre.message(":beurre", centVingtCinq);
+                monMarbre.message(":levure", un);
+                monMarbre.message(":chocolat", vingtCinq);
 
                 Object tempsCrepe = mesCrepes.message("tempsCuisson");
                 assert deux.equals(tempsCrepe);
