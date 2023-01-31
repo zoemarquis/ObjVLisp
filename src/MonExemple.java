@@ -110,7 +110,7 @@ public class MonExemple {
             enzoLeZigoto.message(":vitesse_vol", v_volInteger);
     
             pterosaureClass.message(":message", "parcours1000km", (Message) (o, a) -> ((OObjet) mille
-            .message("/", (Object) o.message("message", "vitesse_vol"))));
+            .message("/", (Object) o.message("vitesse_vol"))));
             // Temps en H pour parcourir 1000km
     
             Object vitesseEnzo = enzoLeZigoto.message("parcours1000km");
