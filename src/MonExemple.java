@@ -76,23 +76,49 @@ public class MonExemple {
         }
 
 
-    public static void exempleNulli() {
-        ObjVLisp obj = ObjVLispFabrique.nouveau();
-        OObjet metaClass = obj.getClasse("Classe");
-
-        OObjet dinosaureClass = metaClass.message(":nouveau", Map.of("nomClasse", "Dinosaure", "nomsAttributs", List.of("nom", "sexe", "taille", "poids", "couleur")));
-
-        // v1
-        OObjet enzoDino = dinosaureClass.message(":nouveau", List.of("Enzo", "Mâle", "Petit", "Leger", "Marron"));
-
-        // v2
-        enzoDino.message(":nom", "Enzo");
-        enzoDino.message(":sexe", "Mâle");
-        enzoDino.message(":taille", "Petit");
-        enzoDino.message(":poids", "Leger");
-        enzoDino.message(":couleur", "Marron");
-
-    }
+        public static void exempleNulli() {
+            ObjVLisp obj = ObjVLispFabrique.nouveau();
+            OObjet metaClass = obj.getClasse("Classe");
+            OObjet systemClass = obj.getClasse("Systeme");
+    
+            OObjet integerClass = obj.getClasse("Entier");
+            OObjet StringClass = obj.getClasse("Chaine");
+    
+            OObjet un = integerClass.message(":nouveau", 1);
+            OObjet cent = integerClass.message(":nouveau", 100);
+    
+            OObjet nom_enzoString = StringClass.message(":nouveau", "Enzo");
+            OObjet maleString = StringClass.message(":nouveau", "Mâle");
+            OObjet petitString = StringClass.message(":nouveau", "Petit");
+            OObjet poidsString = StringClass.message(":nouveau", "30t");
+            OObjet marronString = StringClass.message(":nouveau", "Marron");
+            OObjet v_volInteger = integerClass.message(":nouveau", 1000);
+            // Vitesse en km/h (1000 c'est absurde mais c'est juste pour l'assert a la fin sinon il faudrait un double vu qu'il y a des décimales)
+    
+            OObjet dinosaureClass = metaClass.message(":nouveau", Map.of("nomClasse", "Dinosaure", "nomsAttributs",
+                                    List.of("nom", "sexe", "taille", "poids", "couleur")));
+    
+             OObjet pterosaureClass = metaClass.message(":nouveau", Map.of("nomClasse", "Pterosaure",
+                                    "superClasse", dinosaureClass, "nomsAttributs", List.of("vitesse_vol")));
+    
+            OObjet enzoPterosaure = pterosaureClass.message("nouveau");
+            enzoPterosaure.message(":nom", nom_enzoString);
+            enzoPterosaure.message(":sexe", maleString);
+            enzoPterosaure.message(":taille", petitString);
+            enzoPterosaure.message(":poids", poidsString);
+            enzoPterosaure.message(":couleur", marronString);
+            enzoPterosaure.message(":vitesse_vol", v_volInteger);
+    
+            pterosaureClass.message(":message", "parcours1000km", (Message) (o, a) -> ((OObjet) cent
+            .message("/", (Object) o.message(":message", "vitesse_vol"))));
+            // Temps en H pour parcourir 1000km
+    
+            Object vitesseEnzo = enzoPterosaure.message("parcours1000km");
+            assert un.equals(vitesseEnzo);
+    
+            systemClass.message("afficher", (Object) enzoPterosaure.message("parcours1000km"));
+    
+        }
 
     public static void exempleDLB() {
         ObjVLisp obj = ObjVLispFabrique.nouveau();
