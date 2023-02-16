@@ -14,14 +14,9 @@ class ObjVLispFabrique {
                 List.of("nomClasse", "nomsAttributs", "messages", "superClasse"), "superClasse", null, "messages",
                 null));
         metaClass.setAttribut("classe", metaClass);
-
-        Message nouveau = (o, a) -> {
-            UnObjet oo = (UnObjet) o;
-            Map<String, Object> map = new HashMap<String, Object>();
-            for (String s : oo.getListAttributs()) // o.message("nomsAttributs") et cast ici
-                map.put(s, null);
-            return new UnObjet(o, map);
-        };
+        UnObjet objetClass = new UnObjet(metaClass, Map.of("nomClasse", "Objet", "nomsAttributs",
+                List.of("classe"), "superClasse", null, "messages", null));
+        metaClass.setAttribut("superClass", objetClass);
 
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
@@ -31,63 +26,59 @@ class ObjVLispFabrique {
                 map.put(s, aa.get(s));
             return new UnObjet(o, map);
         };
+        metaClass.setMessage(":nouveau", deuxPointsNouveau);
+
+        Message nouveau = (o, a) -> {
+            UnObjet oo = (UnObjet) o;
+            Map<String, Object> map = new HashMap<String, Object>();
+            for (String s : oo.getListAttributs()) // o.message("nomsAttributs") et cast ici
+                map.put(s, null);
+            return new UnObjet(o, map);
+        };
+        // metaClass.setMessage("nouveau", nouveau);
+        // objetClass.setMessage("nouveau", nouveau);
 
         Message toString = (o, a) -> {
             // si c'est un objet terminal :
             // if (o.message("classe")) cast != metaClass
             StringBuilder ch = new StringBuilder();
-            String nomDeClasse = o.message("nomClasse");
-            if (nomDeClasse != null) {
-                ch.append("Classe ");
-                ch.append(nomDeClasse);
+            UnObjet oo = (UnObjet) o;
+
+            ch.append("instance de la classe ");
+            ch.append(oo.getClasseFormeTextuelle());
+            ch.append("\n");
+
+            // comment choper tous les attributs c'est un objet terminal ?
+            // aller chercher dans la classe correspondante la liste des attributs
+            // et get ici ?
+
+            if (oo.estClasse()) {
+                ch.append("classe ");
+                ch.append(oo.getNomClasse());
+                ch.append("extends ");
+                ch.append(oo.getSuperClasseFormeTextuelle());
                 ch.append("\n");
-            } else {
-                ch.append("Instance de la classe");
-                OObjet classeMere = (OObjet) o.message("classe");
-                ch.append((String) classeMere.message("nomClasse"));
-                ch.append("\n");
+
+                // get list attributs et imprimer la list ,,,, ;
+                // messages seulement les noms des messages
             }
-            // ajouter ses attributs etc toute sa map
+
+            // pour tout ce qui apaprtient à la map :
+            // nom = () (que ce soit list, int, map ...)
+
             return ch.toString();
         };
-
-        // ecrire ici nouveau
-        // ecrire objetC
-        UnObjet objetClass = new UnObjet(metaClass, Map.of("nomClasse", "Objet", "nomsAttributs",
-                List.of("classe"), "superClasse", null, "messages", Map.of("toString", toString, "nouveau", nouveau)));
-
-        metaClass.setAttribut("superClass", objetClass);
-
-        // UnObjet objetClass = metaClass.message(":nouveau", Map.of("nomClasse",
-        // "Objet", "nomsAttributs", List.of("classe"), "superClasse", null, "messages",
-        // null /*
-        // toString */);
-
-        // ecrire ici nouveau
-        // et :nouveau
-
-        // toString :
-        // Je suis une instance de : (nom classe)
-        // Mes attributs sont :
-        // si je suis une classe, alors mon nom de classe
-        // si superclasse : (nom super classe)
-        // si mes messages : alors afficher liste string
-
-        // ajouter a metaclass dans ses attributs les attributs liés à une classe :
-        // nomclasse, nomsAttributs, message, superclasse
-
-        // ajouter à metaclass : nouveau, :nouveau, getter et setter ?
-        // nouveau -> créer unObjet avec classe = metaclass, et ses attributs de classe
-        // tous à nul
+        objetClass.setMessage("toString", toString);
 
         // à écrire en ObjVLisp
-        OObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse", "Systeme"));
+        // OObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
+        // "Systeme"));
         // entier
         // chaine
 
         nosClasses.put("Classe", metaClass);
         nosClasses.put("Objet", objetClass);
-        nosClasses.put("Systeme", systemClass);
+        // nosClasses.put("Systeme", systemClass);
 
         return new RealiseObjVLisp(nosClasses);
     }

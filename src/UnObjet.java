@@ -2,18 +2,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-public class UnObjet implements OObjet {
-
-    private Map<String, Object> info;
-
-    /*
+/*
      * un objet a toujours :
-     * classe :
-     * attributs : aussi une map
+     * classe
+     * objet terminal : ses attributs intancier ou non
      * 
      * une classe a toujours
      * (classe = Classe) (donc il faut connaitre metaclass de ObjVLisp ?)
-     * dans ses attributs : aussi une map
      * nom
      * liste d'attributs (pour instancier des objets terminaux) dans une liste ?
      * map de messages
@@ -21,31 +16,61 @@ public class UnObjet implements OObjet {
      * 
      * déclarer des attributs de classe : on verra + tard
      */
-    // quand on appelle un nouveau objet, il doit forcement connaitre sa super
-    // classe et de quelle classe il est l'instance
 
-    private Boolean estClasse() {
-        if (info.get("nomClasse") != null)
-            return true;
-        return false;
-    }
+public class UnObjet implements OObjet {
 
-    public UnObjet(OObjet saClasse) {
-        // si c'est une classe, alors saClasse = metaClasse (on peut regarder le nom
-        // (string) de la classe pour savoir)
-        // sinon
-        info = new HashMap<String, Object>();
-        info.put("classe", saClasse);
-    }
+    private Map<String, Object> info;
 
     public UnObjet(OObjet saClasse, Map<String, Object> sesAttributs) {
-        // si c'est un objet terminal, une liste plutot ? (nouveau)
-        // si :nouveau, instancier en associant ?
-        this(saClasse);
+        info = new HashMap<String, Object>();
+        info.put("classe", saClasse);
         info.put("nomAttributs", sesAttributs);
+    }
 
-        // nomClasse dont il est l'instance ? seulement si c'est une classe
-        // dedans il y a nomClasse ?
+    /**
+     * Récupère le nom de la classe dont cet objet est l'instance.
+     * Exemple : aPoint retourne "Point"
+     * l'objet représentant la classe Point retourne "Classe"
+     * 
+     * @return une chaîne de caractères composée du nom de la classe dont cet objet
+     *         est l'instance
+     */
+    public String getClasseFormeTextuelle() {
+        return ((UnObjet) info.get("classe")).getNomClasse();
+    }
+
+    /**
+     * Vérifie que cet objet est une classe (instance de Classe).
+     * 
+     * @return vrai si c'est une classe, faux si c'est un objet terminal
+     */
+    public Boolean estClasse() {
+        return getClasseFormeTextuelle().equals("Classe");
+    }
+
+    /**
+     * Si cet objet est une classe, retourne la représentation textuelle de son nom.
+     * Exemple : l'objet représentant la classe Point retourne "Point"
+     * 
+     * @return une chaîne de caractères représentant le nom donné à cette classe
+     */
+    public String getNomClasse() {
+        if (estClasse())
+            return (String) info.get("nomClasse");
+        return "";
+    }
+
+    /**
+     * Récupère le nom de la superclasse dont cet objet est la sous classe.
+     * Exemple : dans MonExemple : Crepe retourne "Dessert"
+     * 
+     * @return une chaîne de caractères composée du nom de la superclasse de cette
+     *         classe
+     */
+    public String getSuperClasseFormeTextuelle() {
+        if (estClasse())
+            return ((UnObjet) info.get("superClasse")).getNomClasse();
+        return "";
     }
 
     public void setAttribut(String nomAttribut, Object valeurAttribut) {
@@ -71,11 +96,12 @@ public class UnObjet implements OObjet {
     public <T> T message(String nom, Object... arguments) { // comment faire pour getter et setter ?
         Message leMsg = null;
         if (!estClasse()) { // si c'est un objet terminal
-            leMsg = ((OObjet) info.get("superclasse")).message(nom, arguments);
-        } else {
-            leMsg = getMessages().get(nom); // si c'est une classe et que le msg est ici
-            if (leMsg == null)
+            leMsg = ((OObjet) info.get("classe")).message(nom, arguments);
+        } else { // sinon c'est une classe
+            leMsg = getMessages().get(nom); // le message est dans cette classe
+            if (leMsg == null) // le message est dans une superclasse
                 leMsg = ((OObjet) info.get("superclasse")).message(nom, arguments);
+            // s'il n'a pas de superclasse -> lancer la methode error
         }
         leMsg.apply(this, arguments);
         return (T) this; // ? type T
