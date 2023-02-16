@@ -22,15 +22,46 @@ class ObjVLispFabrique {
                 map.put(s, null);
             return new UnObjet(o, map);
         };
-        // recuperer la liste du la classe et créer une map avec tou à null
-        Message toString;
-        Message deuxPointsNouveau;
+
+        Message deuxPointsNouveau = (o, a) -> {
+            UnObjet oo = (UnObjet) o;
+            Map<String, Object> aa = (Map<String, Object>) a[0];
+            Map<String, Object> map = new HashMap<String, Object>();
+            for (String s : oo.getListAttributs()) // o.message("nomsAttributs") et cast ici
+                map.put(s, aa.get(s));
+            return new UnObjet(o, map);
+        };
+
+        Message toString = (o, a) -> {
+            // si c'est un objet terminal :
+            // if (o.message("classe")) cast != metaClass
+            StringBuilder ch = new StringBuilder();
+            String nomDeClasse = o.message("nomClasse");
+            if (nomDeClasse != null) {
+                ch.append("Classe ");
+                ch.append(nomDeClasse);
+                ch.append("\n");
+            } else {
+                ch.append("Instance de la classe");
+                OObjet classeMere = (OObjet) o.message("classe");
+                ch.append((String) classeMere.message("nomClasse"));
+                ch.append("\n");
+            }
+            // ajouter ses attributs etc toute sa map
+            return ch.toString();
+        };
 
         // ecrire ici nouveau
         // ecrire objetC
         UnObjet objetClass = new UnObjet(metaClass, Map.of("nomClasse", "Objet", "nomsAttributs",
-                List.of("classe"), "superClasse", null, "messages", null /* toString */));
+                List.of("classe"), "superClasse", null, "messages", Map.of("toString", toString, "nouveau", nouveau)));
+
         metaClass.setAttribut("superClass", objetClass);
+
+        // UnObjet objetClass = metaClass.message(":nouveau", Map.of("nomClasse",
+        // "Objet", "nomsAttributs", List.of("classe"), "superClasse", null, "messages",
+        // null /*
+        // toString */);
 
         // ecrire ici nouveau
         // et :nouveau
