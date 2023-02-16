@@ -18,10 +18,6 @@ public class RealiseObjVLisp implements ObjVLisp {
         return nosClasses.get(nomDeClasse);
     }
 
-    public RealiseObjVLisp() {
-        // pour l'instant pour pouvoir commencer, meme sans metaclass ...
-    }
-
     public RealiseObjVLisp(Map<String, OObjet> nosClasses) {
         // instancie avec des classes deja existantes
         // créer dans la Fabrique

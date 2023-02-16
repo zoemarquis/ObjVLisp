@@ -10,13 +10,21 @@ class ObjVLispFabrique {
     static ObjVLisp nouveau() {
         Map<String, OObjet> nosClasses = new HashMap<String, OObjet>();
 
-        UnObjet metaClass = new UnObjet(null, Map.of("nomClasse", "Classe", "nomsAttributs",
-                List.of("nomClasse", "nomsAttributs", "messages", "superClasse"), "superClasse", null, "messages",
-                null));
+        Map<String, Object> mapClasse = new HashMap<String, Object>();
+        mapClasse.put("nomClasse", "Classe");
+        mapClasse.put("nomsAttributs",
+                List.of("nomClasse", "nomsAttributs", "messages", "superClasse"));
+        mapClasse.put("superClasse", null);
+        mapClasse.put("messages", new HashMap<String, Message>());
+
+        UnObjet metaClass = new UnObjet(null, mapClasse);
         metaClass.setInfo("classe", metaClass);
-        UnObjet objetClass = new UnObjet(metaClass, Map.of("nomClasse", "Objet", "nomsAttributs",
-                List.of("classe"), "superClasse", null, "messages", null));
-        metaClass.setInfo("superClass", objetClass);
+        mapClasse.put("classe", metaClass);
+
+        UnObjet objetClass = new UnObjet(metaClass, mapClasse);
+        objetClass.setInfo("nomClasse", "Objet");
+
+        metaClass.setInfo("superClasse", objetClass);
 
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
@@ -36,7 +44,7 @@ class ObjVLispFabrique {
             return new UnObjet(o, map);
         };
         // metaClass.setMessage("nouveau", nouveau);
-        // objetClass.setMessage("nouveau", nouveau);
+        objetClass.setMessage("nouveau", nouveau);
 
         Message toString = (o, a) -> {
             // si c'est un objet terminal :
@@ -75,7 +83,6 @@ class ObjVLispFabrique {
         // "Systeme"));
         // entier
         // chaine
-
         nosClasses.put("Classe", metaClass);
         nosClasses.put("Objet", objetClass);
         // nosClasses.put("Systeme", systemClass);

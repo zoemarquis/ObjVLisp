@@ -21,6 +21,10 @@ public class UnObjet implements OObjet {
 
     private Map<String, Object> info;
 
+    public UnObjet() {
+        info = new HashMap<String, Object>();
+    }
+
     public UnObjet(OObjet saClasse, Map<String, Object> sesAttributs) {
         info = new HashMap<String, Object>();
         info.put("classe", saClasse);
