@@ -73,23 +73,44 @@ public class UnObjet implements OObjet {
         return "";
     }
 
-    public void setAttribut(String nomAttribut, Object valeurAttribut) {
+    /**
+     * Modifie la map info.
+     * 
+     * @param nomAttribut    la clef dans la map
+     * @param valeurAttribut la valeur dans la map
+     */
+    public void setInfo(String nomAttribut, Object valeurAttribut) {
         info.put(nomAttribut, valeurAttribut);
     }
 
+    /**
+     * Récupère la liste des attributs pour un objet qui est une classe.
+     * Exemple: Point retourne List.of("x","y")
+     * 
+     * @return la liste des attributs de l'objet (représentant une classe)
+     */
     public List<String> getListAttributs() {
         return (List<String>) info.get("nomsAttributs");
     }
 
+    /**
+     * Récupère la map des messages pour un objet qui est une classe.
+     * 
+     * @return la map des messages de l'objet (représentant une classe)
+     */
     public Map<String, Message> getMessages() {
-        // si pas de messages, objet terminal, return null
         return (Map<String, Message>) info.get("messages");
     }
 
+    /**
+     * Modifie la map des messages pour un objet qui est une classe.
+     * 
+     * @param nomMsg la clef du message à ajouter
+     * @param leMsg  le message correspondant
+     */
     public void setMessage(String nomMsg, Message leMsg) {
-        // seulement si c'est une instance de Classe
-        // si objet terminal, error
-        getMessages().put(nomMsg, leMsg);
+        if (estClasse())
+            getMessages().put(nomMsg, leMsg);
     }
 
     @Override

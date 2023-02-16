@@ -13,10 +13,10 @@ class ObjVLispFabrique {
         UnObjet metaClass = new UnObjet(null, Map.of("nomClasse", "Classe", "nomsAttributs",
                 List.of("nomClasse", "nomsAttributs", "messages", "superClasse"), "superClasse", null, "messages",
                 null));
-        metaClass.setAttribut("classe", metaClass);
+        metaClass.setInfo("classe", metaClass);
         UnObjet objetClass = new UnObjet(metaClass, Map.of("nomClasse", "Objet", "nomsAttributs",
                 List.of("classe"), "superClasse", null, "messages", null));
-        metaClass.setAttribut("superClass", objetClass);
+        metaClass.setInfo("superClass", objetClass);
 
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
