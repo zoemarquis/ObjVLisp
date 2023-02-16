@@ -24,6 +24,12 @@ public class UnObjet implements OObjet {
     // quand on appelle un nouveau objet, il doit forcement connaitre sa super
     // classe et de quelle classe il est l'instance
 
+    private Boolean estClasse() {
+        if (info.get("nomClasse") != null)
+            return true;
+        return false;
+    }
+
     public UnObjet(OObjet saClasse) {
         // si c'est une classe, alors saClasse = metaClasse (on peut regarder le nom
         // (string) de la classe pour savoir)
@@ -62,16 +68,17 @@ public class UnObjet implements OObjet {
     }
 
     @Override
-    public <T> T message(String nom, Object... arguments) {
-        return (T) this;
-        /*
-         * si il est accept
-         * if (this.getMapMessages().get(nom) != null) {
-         * return info.get(nom);
-         * } else {
-         * return info.get("classe").message(nom, arguments);
-         * }
-         */
+    public <T> T message(String nom, Object... arguments) { // comment faire pour getter et setter ?
+        Message leMsg = null;
+        if (!estClasse()) { // si c'est un objet terminal
+            leMsg = ((OObjet) info.get("superclasse")).message(nom, arguments);
+        } else {
+            leMsg = getMessages().get(nom); // si c'est une classe et que le msg est ici
+            if (leMsg == null)
+                leMsg = ((OObjet) info.get("superclasse")).message(nom, arguments);
+        }
+        leMsg.apply(this, arguments);
+        return (T) this; // ? type T
     }
 
     @Override
