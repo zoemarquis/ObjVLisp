@@ -24,7 +24,7 @@ public class UnObjet implements OObjet {
     public UnObjet(OObjet saClasse, Map<String, Object> sesAttributs) {
         info = new HashMap<String, Object>();
         info.put("classe", saClasse);
-        info.put("nomAttributs", sesAttributs);
+        info.putAll(sesAttributs);
     }
 
     /**
@@ -90,7 +90,10 @@ public class UnObjet implements OObjet {
      * @return la liste des attributs de l'objet (représentant une classe)
      */
     public List<String> getListAttributs() {
-        return (List<String>) info.get("nomsAttributs");
+        List<String> ret = (List<String>) info.get("nomsAttributs");
+        if (!getNomClasse().equals("Classe"))
+            ret.addAll(((UnObjet) info.get("superclasse")).getListAttributs());
+        return ret;
     }
 
     /**
