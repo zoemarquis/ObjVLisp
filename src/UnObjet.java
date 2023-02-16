@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class UnObjet implements OObjet {
 
@@ -31,20 +32,46 @@ public class UnObjet implements OObjet {
         info.put("classe", saClasse);
     }
 
-    // private static final OObjet metaClass = Map.of("classe",OO);
-
     public UnObjet(OObjet saClasse, Map<String, Object> sesAttributs) {
         // si c'est un objet terminal, une liste plutot ? (nouveau)
         // si :nouveau, instancier en associant ?
         this(saClasse);
         info.put("nomAttributs", sesAttributs);
-        // dedans il y a nomClasse ?
 
+        // nomClasse dont il est l'instance ? seulement si c'est une classe
+        // dedans il y a nomClasse ?
+    }
+
+    public void setAttribut(String nomAttribut, Object valeurAttribut) {
+        info.put(nomAttribut, valeurAttribut);
+    }
+
+    public List<String> getListAttributs() {
+        return (List<String>) info.get("nomsAttributs");
+    }
+
+    public Map<String, Message> getMessages() {
+        // si pas de messages, objet terminal, return null
+        return (Map<String, Message>) info.get("messages");
+    }
+
+    public void setMessage(String nomMsg, Message leMsg) {
+        // seulement si c'est une instance de Classe
+        // si objet terminal, error
+        getMessages().put(nomMsg, leMsg);
     }
 
     @Override
     public <T> T message(String nom, Object... arguments) {
         return (T) this;
+        /*
+         * si il est accept
+         * if (this.getMapMessages().get(nom) != null) {
+         * return info.get(nom);
+         * } else {
+         * return info.get("classe").message(nom, arguments);
+         * }
+         */
     }
 
     @Override

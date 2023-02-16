@@ -15,7 +15,7 @@ public class RealiseObjVLisp implements ObjVLisp {
     public OObjet getClasse(String nomDeClasse) {
         // si n'existe pas -> exception ?
         // error ? ce n'est pas un OObjet
-        return nosClasses.get("Point");
+        return nosClasses.get(nomDeClasse);
     }
 
     public RealiseObjVLisp() {
