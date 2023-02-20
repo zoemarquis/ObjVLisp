@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
 
 interface Message {
     Object apply(OObjet unObjet, Object... arguments);
@@ -37,10 +38,6 @@ class RealiseObjVLisp implements ObjVLisp {
         return nosClasses.get(nomDeClasse);
     }
 
-    public RealiseObjVLisp() {
-        // pour l'instant pour pouvoir commencer, meme sans metaclass ...
-    }
-
     public RealiseObjVLisp(Map<String, OObjet> nosClasses) {
         // instancie avec des classes deja existantes
         // créer dans la Fabrique
@@ -57,45 +54,76 @@ class ObjVLispFabrique {
     static ObjVLisp nouveau() {
         Map<String, OObjet> nosClasses = new HashMap<String, OObjet>();
 
-        Map<String, Object> mapClasse = new HashMap<String, Object>();
-        mapClasse.put("nomClasse", "Classe");
-        mapClasse.put("nomsAttributs",
-                List.of("nomClasse", "nomsAttributs", "messages", "superClasse"));
-        mapClasse.put("superClasse", null);
-        mapClasse.put("messages", new HashMap<String, Message>());
+        Map<String, Object> mapMetaClasse = new HashMap<String, Object>();
+        mapMetaClasse.put("nomClasse", "Classe");
+        mapMetaClasse.put("nomsAttributs", List.of("nomClasse", "nomsAttributs", "messages", "superClasse"));
+        mapMetaClasse.put("superClasse", null);
+        mapMetaClasse.put("messages", new HashMap<String, Message>());
 
-        UnObjet metaClass = new UnObjet(null, mapClasse);
+        Map<String, Object> mapObjClasse = new HashMap<String, Object>();
+        mapObjClasse.put("nomClasse", "Objet");
+        mapObjClasse.put("nomsAttributs", List.of("classe"));
+        mapObjClasse.put("superClasse", null);
+        mapObjClasse.put("messages", new HashMap<String, Message>());
+
+        UnObjet metaClass = new UnObjet(null, mapMetaClasse);
         metaClass.setInfo("classe", metaClass);
-        mapClasse.put("classe", metaClass);
 
-        UnObjet objetClass = new UnObjet(metaClass, mapClasse);
-        objetClass.setInfo("nomClasse", "Objet");
-
+        UnObjet objetClass = new UnObjet(metaClass, mapObjClasse);
         metaClass.setInfo("superClasse", objetClass);
+
+        Message setter = (o, a) -> {
+            // si il ne l'accepte pas?
+            UnObjet oo = (UnObjet) o;
+            oo.setInfo((String) a[0], a[1]);
+            return a[1]; // que doit il retourner ?
+        };
 
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             Map<String, Object> aa = (Map<String, Object>) a[0];
             Map<String, Object> map = new HashMap<String, Object>();
-            for (String s : oo.getListAttributs()) // o.message("nomsAttributs") et cast ici
-                map.put(s, aa.get(s));
+            for (String s : oo.getListAttributs()) {
+                Object valeur = aa.get(s);
+                if (s.equals("nomsAttribus") && valeur == null) {
+                    map.put(s, new ArrayList<String>());
+                } else if (s.equals("messages") && valeur == null) {
+                    map.put(s, new HashMap<String, Message>());
+                } else if (s.equals("superClasse") && valeur == null) {
+                    map.put(s, objetClass);
+                } else {
+                    map.put(s, valeur); // getter
+                    // ajouter getter et setter
+                    map.put(":" + s, setter);
+                }
+            }
             return new UnObjet(o, map);
         };
         metaClass.setMessage(":nouveau", deuxPointsNouveau);
 
+        // ça c'est leouveau de metaclass enfaite, pas de Objet
+
         Message nouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             Map<String, Object> map = new HashMap<String, Object>();
-            for (String s : oo.getListAttributs()) // o.message("nomsAttributs") et cast ici
-                map.put(s, null);
+            for (String s : oo.getListAttributs()) {
+                if (s.equals("nomsAttribus")) {
+                    map.put(s, new ArrayList<String>());
+                } else if (s.equals("messages")) {
+                    map.put(s, new HashMap<String, Message>());
+                } else if (s.equals("superClasse")) {
+                    map.put(s, objetClass);
+                } else {
+                    map.put(s, null);
+                }
+            }
             return new UnObjet(o, map);
         };
-        // metaClass.setMessage("nouveau", nouveau);
         objetClass.setMessage("nouveau", nouveau);
 
+        // faire une version de toString qui imprime toute la map, qu'on puisse check
+        // que les objets n'ont que les bonnes méthodes
         Message toString = (o, a) -> {
-            // si c'est un objet terminal :
-            // if (o.message("classe")) cast != metaClass
             StringBuilder ch = new StringBuilder();
             UnObjet oo = (UnObjet) o;
 
@@ -103,55 +131,62 @@ class ObjVLispFabrique {
             ch.append(oo.getClasseFormeTextuelle());
             ch.append("\n");
 
-            // comment choper tous les attributs c'est un objet terminal ?
-            // aller chercher dans la classe correspondante la liste des attributs
-            // et get ici ?
-
             if (oo.estClasse()) {
                 ch.append("classe ");
                 ch.append(oo.getNomClasse());
-                ch.append("extends ");
+                ch.append(" extends ");
                 ch.append(oo.getSuperClasseFormeTextuelle());
                 ch.append("\n");
 
-                // get list attributs et imprimer la list ,,,, ;
-                // messages seulement les noms des messages
+                ch.append("ses attributs :\n");
+                for (String s : oo.getListAttributs()) {
+                    ch.append("\t" + s);
+                }
+                ch.append("\n");
+                ch.append("ses messages :\n");
+                for (String s : oo.getMessages().keySet()) {
+                    ch.append("\t" + s);
+                }
+                ch.append("\n");
+
+            } else {
+
+                // récupérer la liste de la classe mere
+                UnObjet mere = (UnObjet) oo.getClasse();
+                // pour chaque attribut de sa liste d'attributs
+                // pour chaque getter , afficher nom = valeur
+                for (String s : mere.getListAttributs()) {
+                    ch.append(s);
+                    ch.append(" = ");
+                    ch.append((String) oo.message(s));
+                }
+
             }
 
-            // pour tout ce qui apaprtient à la map :
-            // nom = () (que ce soit list, int, map ...)
-
             return ch.toString();
+
         };
         objetClass.setMessage("toString", toString);
 
-        // à écrire en ObjVLisp
-        // OObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
-        // "Systeme"));
+        UnObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
+                "Systeme", "messages", Map.of("afficher",
+                        ((Message) (o, a) -> {
+                            OObjet aa = (OObjet) a[0];
+                            String chaine = aa.message("toString");
+                            System.out.println(chaine);
+                            return chaine;
+                        }))));
+
         // entier
         // chaine
+
         nosClasses.put("Classe", metaClass);
         nosClasses.put("Objet", objetClass);
-        // nosClasses.put("Systeme", systemClass);
+        nosClasses.put("Systeme", systemClass);
 
         return new RealiseObjVLisp(nosClasses);
     }
 }
-
-/*
- * un objet a toujours :
- * classe
- * objet terminal : ses attributs intancier ou non
- * 
- * une classe a toujours
- * (classe = Classe) (donc il faut connaitre metaclass de ObjVLisp ?)
- * nom
- * liste d'attributs (pour instancier des objets terminaux) dans une liste ?
- * map de messages
- * superclasse
- * 
- * déclarer des attributs de classe : on verra + tard
- */
 
 class UnObjet implements OObjet {
 
@@ -176,6 +211,10 @@ class UnObjet implements OObjet {
         return ((UnObjet) info.get("classe")).getNomClasse();
     }
 
+    public OObjet getClasse() {
+        return (OObjet) info.get("classe");
+    }
+
     /**
      * Vérifie que cet objet est une classe (instance de Classe).
      * 
@@ -192,9 +231,11 @@ class UnObjet implements OObjet {
      * @return une chaîne de caractères représentant le nom donné à cette classe
      */
     public String getNomClasse() {
-        // if (estClasse())
         return (String) info.get("nomClasse");
-        // return "";
+    }
+
+    public UnObjet getSuperClasse() {
+        return (UnObjet) info.get("superClasse");
     }
 
     /**
@@ -205,7 +246,7 @@ class UnObjet implements OObjet {
      *         classe
      */
     public String getSuperClasseFormeTextuelle() {
-        if (estClasse())
+        if (estClasse() && info.get("superClasse") != null)
             return ((UnObjet) info.get("superClasse")).getNomClasse();
         return "";
     }
@@ -228,8 +269,10 @@ class UnObjet implements OObjet {
      */
     public List<String> getListAttributs() {
         List<String> ret = (List<String>) info.get("nomsAttributs");
-        if (!getNomClasse().equals("Classe"))
-            ret.addAll(((UnObjet) info.get("superclasse")).getListAttributs());
+        /*
+         * if (((UnObjet) info.get("superClasse")) != null)
+         * ret.addAll(((UnObjet) info.get("superClasse")).getListAttributs());
+         */
         return ret;
     }
 
@@ -240,6 +283,24 @@ class UnObjet implements OObjet {
      */
     public Map<String, Message> getMessages() {
         return (Map<String, Message>) info.get("messages");
+    }
+
+    public Message getMessage(String nom) {
+        Message leMsg = null;
+        UnObjet superC = ((UnObjet) info.get("classe"));
+        if (estClasse())
+            leMsg = getMessages().get(nom);
+        if (leMsg == null) // sinon boucle infernale
+            leMsg = superC.getMessages().get(nom);
+        if (leMsg == null) { // verif que superClass pas a null
+            superC = superC.getSuperClasse();
+            while (leMsg == null && superC != null) {
+                leMsg = superC.getMessages().get(nom);
+                superC = superC.getSuperClasse();
+            }
+        }
+        // si null -> error
+        return leMsg;
     }
 
     /**
@@ -255,17 +316,12 @@ class UnObjet implements OObjet {
 
     @Override
     public <T> T message(String nom, Object... arguments) { // comment faire pour getter et setter ?
-        Message leMsg = null;
-        if (!estClasse()) { // si c'est un objet terminal
-            leMsg = ((OObjet) info.get("classe")).message(nom, arguments);
-        } else { // sinon c'est une classe
-            leMsg = getMessages().get(nom); // le message est dans cette classe
-            if (leMsg == null) // le message est dans une superclasse
-                leMsg = ((OObjet) info.get("superclasse")).message(nom, arguments);
-            // s'il n'a pas de superclasse -> lancer la methode error
+        Message leMsg = getMessage(nom);
+        if (leMsg == null) {
+            // error;
+            System.out.println("Message introuvable");
         }
-        leMsg.apply(this, arguments);
-        return (T) this; // ? type T
+        return (T) leMsg.apply(this, arguments);
     }
 
     @Override

@@ -21,12 +21,9 @@ public class UnObjet implements OObjet {
 
     private Map<String, Object> info;
 
-    public UnObjet() {
-        info = new HashMap<String, Object>();
-    }
-
     public UnObjet(OObjet saClasse, Map<String, Object> sesAttributs) {
         info = new HashMap<String, Object>();
+        info.put("classe", saClasse);
         info.put("classe", saClasse);
         info.putAll(sesAttributs);
     }
@@ -96,7 +93,7 @@ public class UnObjet implements OObjet {
     public List<String> getListAttributs() {
         List<String> ret = (List<String>) info.get("nomsAttributs");
         if (!getNomClasse().equals("Classe"))
-            ret.addAll(((UnObjet) info.get("superclasse")).getListAttributs());
+            ret.addAll(((UnObjet) info.get("superClasse")).getListAttributs());
         return ret;
     }
 
@@ -107,6 +104,19 @@ public class UnObjet implements OObjet {
      */
     public Map<String, Message> getMessages() {
         return (Map<String, Message>) info.get("messages");
+    }
+
+    public Message getMessage(String nom) {
+        Message leMsg = null;
+        if (!estClasse()) { // si c'est un objet terminal
+            leMsg = ((UnObjet) info.get("classe")).getMessage(nom);
+        } else { // sinon c'est une classe
+            leMsg = getMessages().get(nom); // le message est dans cette classe
+            if (leMsg == null) // le message est dans une superclasse
+                leMsg = ((UnObjet) info.get("superClasse")).getMessage(nom);
+            // s'il n'a pas de superclasse -> lancer la methode error
+        }
+        return leMsg;
     }
 
     /**
@@ -122,17 +132,11 @@ public class UnObjet implements OObjet {
 
     @Override
     public <T> T message(String nom, Object... arguments) { // comment faire pour getter et setter ?
-        Message leMsg = null;
-        if (!estClasse()) { // si c'est un objet terminal
-            leMsg = ((OObjet) info.get("classe")).message(nom, arguments);
-        } else { // sinon c'est une classe
-            leMsg = getMessages().get(nom); // le message est dans cette classe
-            if (leMsg == null) // le message est dans une superclasse
-                leMsg = ((OObjet) info.get("superclasse")).message(nom, arguments);
-            // s'il n'a pas de superclasse -> lancer la methode error
+        Message leMsg = getMessage(nom);
+        if (leMsg == null) {
+            // error;
         }
-        leMsg.apply(this, arguments);
-        return (T) this; // ? type T
+        return (T) leMsg.apply(this, arguments);
     }
 
     @Override

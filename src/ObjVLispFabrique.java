@@ -46,6 +46,8 @@ class ObjVLispFabrique {
         // metaClass.setMessage("nouveau", nouveau);
         objetClass.setMessage("nouveau", nouveau);
 
+        // faire une version de toString qui imprime toute la map, qu'on puisse check
+        // que les objets n'ont que les bonnes méthodes
         Message toString = (o, a) -> {
             // si c'est un objet terminal :
             // if (o.message("classe")) cast != metaClass
@@ -78,14 +80,21 @@ class ObjVLispFabrique {
         };
         objetClass.setMessage("toString", toString);
 
-        // à écrire en ObjVLisp
-        // OObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
-        // "Systeme"));
+        // à écrire en ObjVLisp plus tard
         // entier
         // chaine
+
+        UnObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse", "Systeme"));
+        Message afficher = (o, a) -> {
+            String chaine = o.message("toString");
+            System.out.println(chaine);
+            return chaine;
+        };
+        systemClass.setMessage("afficher", afficher);
+
         nosClasses.put("Classe", metaClass);
         nosClasses.put("Objet", objetClass);
-        // nosClasses.put("Systeme", systemClass);
+        nosClasses.put("Systeme", systemClass);
 
         return new RealiseObjVLisp(nosClasses);
     }
