@@ -1,23 +1,9 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
 
-/*
-     * un objet a toujours :
-     * classe
-     * objet terminal : ses attributs intancier ou non
-     * 
-     * une classe a toujours
-     * (classe = Classe) (donc il faut connaitre metaclass de ObjVLisp ?)
-     * nom
-     * liste d'attributs (pour instancier des objets terminaux) dans une liste ?
-     * map de messages
-     * superclasse
-     * 
-     * déclarer des attributs de classe : on verra + tard
-     */
-
-public class UnObjet implements OObjet {
+class UnObjet implements OObjet {
 
     private Map<String, Object> info;
 
@@ -40,6 +26,10 @@ public class UnObjet implements OObjet {
         return ((UnObjet) info.get("classe")).getNomClasse();
     }
 
+    public OObjet getClasse() {
+        return (OObjet) info.get("classe");
+    }
+
     /**
      * Vérifie que cet objet est une classe (instance de Classe).
      * 
@@ -56,9 +46,11 @@ public class UnObjet implements OObjet {
      * @return une chaîne de caractères représentant le nom donné à cette classe
      */
     public String getNomClasse() {
-        if (estClasse())
-            return (String) info.get("nomClasse");
-        return "";
+        return (String) info.get("nomClasse");
+    }
+
+    public UnObjet getSuperClasse() {
+        return (UnObjet) info.get("superClasse");
     }
 
     /**
@@ -69,7 +61,7 @@ public class UnObjet implements OObjet {
      *         classe
      */
     public String getSuperClasseFormeTextuelle() {
-        if (estClasse())
+        if (estClasse() && info.get("superClasse") != null)
             return ((UnObjet) info.get("superClasse")).getNomClasse();
         return "";
     }
@@ -92,8 +84,10 @@ public class UnObjet implements OObjet {
      */
     public List<String> getListAttributs() {
         List<String> ret = (List<String>) info.get("nomsAttributs");
-        if (!getNomClasse().equals("Classe"))
-            ret.addAll(((UnObjet) info.get("superClasse")).getListAttributs());
+        /*
+         * if (((UnObjet) info.get("superClasse")) != null)
+         * ret.addAll(((UnObjet) info.get("superClasse")).getListAttributs());
+         */
         return ret;
     }
 
@@ -108,14 +102,19 @@ public class UnObjet implements OObjet {
 
     public Message getMessage(String nom) {
         Message leMsg = null;
-        if (!estClasse()) { // si c'est un objet terminal
-            leMsg = ((UnObjet) info.get("classe")).getMessage(nom);
-        } else { // sinon c'est une classe
-            leMsg = getMessages().get(nom); // le message est dans cette classe
-            if (leMsg == null) // le message est dans une superclasse
-                leMsg = ((UnObjet) info.get("superClasse")).getMessage(nom);
-            // s'il n'a pas de superclasse -> lancer la methode error
+        UnObjet superC = ((UnObjet) info.get("classe"));
+        if (estClasse())
+            leMsg = getMessages().get(nom);
+        if (leMsg == null) // sinon boucle infernale
+            leMsg = superC.getMessages().get(nom);
+        if (leMsg == null) { // verif que superClass pas a null
+            superC = superC.getSuperClasse();
+            while (leMsg == null && superC != null) {
+                leMsg = superC.getMessages().get(nom);
+                superC = superC.getSuperClasse();
+            }
         }
+        // si null -> error
         return leMsg;
     }
 
@@ -135,6 +134,7 @@ public class UnObjet implements OObjet {
         Message leMsg = getMessage(nom);
         if (leMsg == null) {
             // error;
+            System.out.println("Message introuvable");
         }
         return (T) leMsg.apply(this, arguments);
     }

@@ -24,13 +24,6 @@ class RealiseObjVLisp implements ObjVLisp {
 
     private Map<String, OObjet> nosClasses;
 
-    // Objet :: toString, nouveau
-    // Classe (MetaClasse) :: nouveau, :accept, :message
-
-    // Systeme :: afficher (une classe avec message)
-    // Chaine
-    // Entier
-
     @Override
     public OObjet getClasse(String nomDeClasse) {
         // si n'existe pas -> exception ?
@@ -72,20 +65,13 @@ class ObjVLispFabrique {
         UnObjet objetClass = new UnObjet(metaClass, mapObjClasse);
         metaClass.setInfo("superClasse", objetClass);
 
-        Message setter = (o, a) -> {
-            // si il ne l'accepte pas?
-            UnObjet oo = (UnObjet) o;
-            oo.setInfo((String) a[0], a[1]);
-            return a[1]; // que doit il retourner ?
-        };
-
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             Map<String, Object> aa = (Map<String, Object>) a[0];
             Map<String, Object> map = new HashMap<String, Object>();
             for (String s : oo.getListAttributs()) {
                 Object valeur = aa.get(s);
-                if (s.equals("nomsAttribus") && valeur == null) {
+                if (s.equals("nomsAttributs") && valeur == null) {
                     map.put(s, new ArrayList<String>());
                 } else if (s.equals("messages") && valeur == null) {
                     map.put(s, new HashMap<String, Message>());
@@ -94,7 +80,22 @@ class ObjVLispFabrique {
                 } else {
                     map.put(s, valeur); // getter
                     // ajouter getter et setter
-                    map.put(":" + s, setter);
+                    // map.put(":" + s, setter);
+                }
+            }
+            List<String> lesAttr = (List<String>) map.get("nomsAttributs");
+            if (lesAttr != null) {
+                Map<String, Object> msg = (Map<String, Object>) map.get("messages");
+                for (String s : lesAttr) {
+                    msg.put(s, (Message) (ob, arg) -> {
+                        UnObjet oob = (UnObjet) ob;
+                        return oob.getInfo(s);
+                    });
+                    msg.put(":" + s, (Message) (ob, arg) -> {
+                        UnObjet oob = (UnObjet) ob;
+                        oob.setInfo(s, arg[0]);
+                        return oob; // ?
+                    });
                 }
             }
             return new UnObjet(o, map);
@@ -151,16 +152,13 @@ class ObjVLispFabrique {
 
             } else {
 
-                // récupérer la liste de la classe mere
                 UnObjet mere = (UnObjet) oo.getClasse();
-                // pour chaque attribut de sa liste d'attributs
-                // pour chaque getter , afficher nom = valeur
                 for (String s : mere.getListAttributs()) {
                     ch.append(s);
                     ch.append(" = ");
-                    ch.append((String) oo.message(s));
+                    ch.append(o.message(s).toString());
+                    ch.append("\n");
                 }
-
             }
 
             return ch.toString();
@@ -169,13 +167,14 @@ class ObjVLispFabrique {
         objetClass.setMessage("toString", toString);
 
         UnObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
-                "Systeme", "messages", Map.of("afficher",
-                        ((Message) (o, a) -> {
-                            OObjet aa = (OObjet) a[0];
-                            String chaine = aa.message("toString");
-                            System.out.println(chaine);
-                            return chaine;
-                        }))));
+                "Systeme"));
+        Message afficher = (o, a) -> {
+            OObjet aa = (OObjet) a[0];
+            String chaine = aa.message("toString");
+            System.out.println(chaine);
+            return chaine;
+        };
+        systemClass.setMessage("afficher", afficher);
 
         // entier
         // chaine
@@ -261,6 +260,10 @@ class UnObjet implements OObjet {
         info.put(nomAttribut, valeurAttribut);
     }
 
+    public Object getInfo(String nomAttribut) {
+        return info.get(nomAttribut);
+    }
+
     /**
      * Récupère la liste des attributs pour un objet qui est une classe.
      * Exemple: Point retourne List.of("x","y")
@@ -290,9 +293,9 @@ class UnObjet implements OObjet {
         UnObjet superC = ((UnObjet) info.get("classe"));
         if (estClasse())
             leMsg = getMessages().get(nom);
-        if (leMsg == null) // sinon boucle infernale
-            leMsg = superC.getMessages().get(nom);
-        if (leMsg == null) { // verif que superClass pas a null
+        if (leMsg == null)
+            leMsg = superC.getMessages().get(nom); // message de la classe associée
+        if (leMsg == null) {
             superC = superC.getSuperClasse();
             while (leMsg == null && superC != null) {
                 leMsg = superC.getMessages().get(nom);
@@ -301,6 +304,7 @@ class UnObjet implements OObjet {
         }
         // si null -> error
         return leMsg;
+
     }
 
     /**

@@ -1,15 +1,11 @@
+import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
-public class RealiseObjVLisp implements ObjVLisp {
+class RealiseObjVLisp implements ObjVLisp {
 
     private Map<String, OObjet> nosClasses;
-
-    // Objet :: toString, nouveau
-    // Classe (MetaClasse) :: nouveau, :accept, :message
-
-    // Systeme :: afficher (une classe avec message)
-    // Chaine
-    // Entier
 
     @Override
     public OObjet getClasse(String nomDeClasse) {
