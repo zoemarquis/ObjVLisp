@@ -1,7 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
 
 class UnObjet implements OObjet {
 
@@ -76,6 +75,10 @@ class UnObjet implements OObjet {
         info.put(nomAttribut, valeurAttribut);
     }
 
+    public Object getInfo(String nomAttribut) {
+        return info.get(nomAttribut);
+    }
+
     /**
      * Récupère la liste des attributs pour un objet qui est une classe.
      * Exemple: Point retourne List.of("x","y")
@@ -105,9 +108,9 @@ class UnObjet implements OObjet {
         UnObjet superC = ((UnObjet) info.get("classe"));
         if (estClasse())
             leMsg = getMessages().get(nom);
-        if (leMsg == null) // sinon boucle infernale
-            leMsg = superC.getMessages().get(nom);
-        if (leMsg == null) { // verif que superClass pas a null
+        if (leMsg == null)
+            leMsg = superC.getMessages().get(nom); // message de la classe associée
+        if (leMsg == null) {
             superC = superC.getSuperClasse();
             while (leMsg == null && superC != null) {
                 leMsg = superC.getMessages().get(nom);
@@ -116,6 +119,7 @@ class UnObjet implements OObjet {
         }
         // si null -> error
         return leMsg;
+
     }
 
     /**

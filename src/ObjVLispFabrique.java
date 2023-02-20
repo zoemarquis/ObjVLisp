@@ -29,20 +29,13 @@ class ObjVLispFabrique {
         UnObjet objetClass = new UnObjet(metaClass, mapObjClasse);
         metaClass.setInfo("superClasse", objetClass);
 
-        Message setter = (o, a) -> {
-            // si il ne l'accepte pas?
-            UnObjet oo = (UnObjet) o;
-            oo.setInfo((String) a[0], a[1]);
-            return a[1]; // que doit il retourner ?
-        };
-
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             Map<String, Object> aa = (Map<String, Object>) a[0];
             Map<String, Object> map = new HashMap<String, Object>();
             for (String s : oo.getListAttributs()) {
                 Object valeur = aa.get(s);
-                if (s.equals("nomsAttribus") && valeur == null) {
+                if (s.equals("nomsAttributs") && valeur == null) {
                     map.put(s, new ArrayList<String>());
                 } else if (s.equals("messages") && valeur == null) {
                     map.put(s, new HashMap<String, Message>());
@@ -52,6 +45,21 @@ class ObjVLispFabrique {
                     map.put(s, valeur); // getter
                     // ajouter getter et setter
                     // map.put(":" + s, setter);
+                }
+            }
+            List<String> lesAttr = (List<String>) map.get("nomsAttributs");
+            if (lesAttr != null) {
+                Map<String, Object> msg = (Map<String, Object>) map.get("messages");
+                for (String s : lesAttr) {
+                    msg.put(s, (Message) (ob, arg) -> {
+                        UnObjet oob = (UnObjet) ob;
+                        return oob.getInfo(s);
+                    });
+                    msg.put(":" + s, (Message) (ob, arg) -> {
+                        UnObjet oob = (UnObjet) ob;
+                        oob.setInfo(s, arg[0]);
+                        return oob; // ?
+                    });
                 }
             }
             return new UnObjet(o, map);
@@ -108,16 +116,13 @@ class ObjVLispFabrique {
 
             } else {
 
-                // récupérer la liste de la classe mere
                 UnObjet mere = (UnObjet) oo.getClasse();
-                // pour chaque attribut de sa liste d'attributs
-                // pour chaque getter , afficher nom = valeur
                 for (String s : mere.getListAttributs()) {
                     ch.append(s);
                     ch.append(" = ");
-                    ch.append((String) oo.message(s));
+                    ch.append(o.message(s).toString());
+                    ch.append("\n");
                 }
-
             }
 
             return ch.toString();
