@@ -1,15 +1,14 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
 
 class UnObjet implements OObjet {
 
     private Map<String, Object> info;
 
-    public UnObjet(OObjet saClasse, Map<String, Object> sesAttributs) {
+    public UnObjet(Map<String, Object> sesAttributs) {
         info = new HashMap<String, Object>();
-        info.put("classe", saClasse);
-        info.put("classe", saClasse);
         info.putAll(sesAttributs);
     }
 
@@ -35,7 +34,7 @@ class UnObjet implements OObjet {
      * @return vrai si c'est une classe, faux si c'est un objet terminal
      */
     public Boolean estClasse() {
-        return getClasseFormeTextuelle().equals("Classe");
+        return info.get("nomClasse") != null;
     }
 
     /**
@@ -85,12 +84,10 @@ class UnObjet implements OObjet {
      * 
      * @return la liste des attributs de l'objet (représentant une classe)
      */
-    public List<String> getListAttributs() {
-        List<String> ret = (List<String>) info.get("nomsAttributs");
-        /*
-         * if (((UnObjet) info.get("superClasse")) != null)
-         * ret.addAll(((UnObjet) info.get("superClasse")).getListAttributs());
-         */
+    public List<String> getListAllAttributs() {
+        List<String> ret = new ArrayList<String>((List<String>) info.get("nomsAttributs"));
+        if (((UnObjet) info.get("superClasse")) != null)
+            ret.addAll(List.copyOf(((UnObjet) info.get("superClasse")).getListAllAttributs()));
         return ret;
     }
 
@@ -105,19 +102,24 @@ class UnObjet implements OObjet {
 
     public Message getMessage(String nom) {
         Message leMsg = null;
-        UnObjet superC = ((UnObjet) info.get("classe"));
+        UnObjet c = (UnObjet) getClasse();
         if (estClasse())
             leMsg = getMessages().get(nom);
-        if (leMsg == null)
-            leMsg = superC.getMessages().get(nom); // message de la classe associée
         if (leMsg == null) {
-            superC = superC.getSuperClasse();
-            while (leMsg == null && superC != null) {
-                leMsg = superC.getMessages().get(nom);
-                superC = superC.getSuperClasse();
+            while (leMsg == null && c != null) {
+                leMsg = c.getMessages().get(nom);
+                c = c.getSuperClasse();
             }
         }
-        // si null -> error
+        /*
+         * if (leMsg == null) { // inutile ?
+         * c = getSuperClasse();
+         * while (leMsg == null && c != null) {
+         * leMsg = c.getMessages().get(nom);
+         * c = c.getSuperClasse();
+         * }
+         * }
+         */
         return leMsg;
 
     }
@@ -138,7 +140,7 @@ class UnObjet implements OObjet {
         Message leMsg = getMessage(nom);
         if (leMsg == null) {
             // error;
-            System.out.println("Message introuvable");
+            System.out.println(nom + " : Message introuvable");
         }
         return (T) leMsg.apply(this, arguments);
     }

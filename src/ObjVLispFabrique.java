@@ -17,34 +17,42 @@ class ObjVLispFabrique {
         mapMetaClasse.put("superClasse", null);
         mapMetaClasse.put("messages", new HashMap<String, Message>());
 
+        UnObjet metaClass = new UnObjet(mapMetaClasse);
+        metaClass.setInfo("classe", metaClass);
+
         Map<String, Object> mapObjClasse = new HashMap<String, Object>();
+        mapObjClasse.put("classe", metaClass);
         mapObjClasse.put("nomClasse", "Objet");
         mapObjClasse.put("nomsAttributs", List.of("classe"));
         mapObjClasse.put("superClasse", null);
         mapObjClasse.put("messages", new HashMap<String, Message>());
 
-        UnObjet metaClass = new UnObjet(null, mapMetaClasse);
-        metaClass.setInfo("classe", metaClass);
-
-        UnObjet objetClass = new UnObjet(metaClass, mapObjClasse);
+        UnObjet objetClass = new UnObjet(mapObjClasse);
         metaClass.setInfo("superClasse", objetClass);
+
+        Message deuxPointsMessage = (o, a) -> {
+            UnObjet oo = (UnObjet) o;
+            oo.setMessage((String) a[0], (Message) a[1]);
+            return 0; // ?
+        };
+        metaClass.setMessage(":message", deuxPointsMessage);
 
         Message deuxPointsNouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             Map<String, Object> aa = (Map<String, Object>) a[0];
             Map<String, Object> map = new HashMap<String, Object>();
-            for (String s : oo.getListAttributs()) {
+            for (String s : oo.getListAllAttributs()) {
                 Object valeur = aa.get(s);
-                if (s.equals("nomsAttributs") && valeur == null) {
+                if (s.equals("classe")) {
+                    map.put(s, o);
+                } else if (s.equals("nomsAttributs") && valeur == null) {
                     map.put(s, new ArrayList<String>());
                 } else if (s.equals("messages") && valeur == null) {
                     map.put(s, new HashMap<String, Message>());
                 } else if (s.equals("superClasse") && valeur == null) {
                     map.put(s, objetClass);
                 } else {
-                    map.put(s, valeur); // getter
-                    // ajouter getter et setter
-                    // map.put(":" + s, setter);
+                    map.put(s, valeur);
                 }
             }
             List<String> lesAttr = (List<String>) map.get("nomsAttributs");
@@ -62,7 +70,7 @@ class ObjVLispFabrique {
                     });
                 }
             }
-            return new UnObjet(o, map);
+            return new UnObjet(map);
         };
         metaClass.setMessage(":nouveau", deuxPointsNouveau);
 
@@ -71,18 +79,20 @@ class ObjVLispFabrique {
         Message nouveau = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             Map<String, Object> map = new HashMap<String, Object>();
-            for (String s : oo.getListAttributs()) {
-                if (s.equals("nomsAttribus")) {
+            for (String s : oo.getListAllAttributs()) {
+                if (s.equals("classe")) {
+                    map.put(s, o);
+                } else if (s.equals("nomsAttribus")) {
                     map.put(s, new ArrayList<String>());
                 } else if (s.equals("messages")) {
                     map.put(s, new HashMap<String, Message>());
                 } else if (s.equals("superClasse")) {
-                    map.put(s, objetClass);
+                    map.put(s, objetClass); // c'est le nouveau de metaclass ?
                 } else {
                     map.put(s, null);
                 }
             }
-            return new UnObjet(o, map);
+            return new UnObjet(map);
         };
         objetClass.setMessage("nouveau", nouveau);
 
@@ -104,7 +114,7 @@ class ObjVLispFabrique {
                 ch.append("\n");
 
                 ch.append("ses attributs :\n");
-                for (String s : oo.getListAttributs()) {
+                for (String s : oo.getListAllAttributs()) {
                     ch.append("\t" + s);
                 }
                 ch.append("\n");
@@ -113,30 +123,29 @@ class ObjVLispFabrique {
                     ch.append("\t" + s);
                 }
                 ch.append("\n");
-
             } else {
 
                 UnObjet mere = (UnObjet) oo.getClasse();
-                for (String s : mere.getListAttributs()) {
-                    ch.append(s);
-                    ch.append(" = ");
-                    ch.append(o.message(s).toString());
-                    ch.append("\n");
+                Object valeur = null;
+                for (String s : mere.getListAllAttributs()) {
+                    if (!s.equals("classe")) {
+                        ch.append(s);
+                        ch.append(" = ");
+                        valeur = o.message(s);
+                        ch.append((valeur != null) ? (valeur.toString()) : ("null"));
+                        ch.append("\n");
+                    }
                 }
             }
-
             return ch.toString();
-
         };
         objetClass.setMessage("toString", toString);
 
         UnObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
                 "Systeme"));
         Message afficher = (o, a) -> {
-            OObjet aa = (OObjet) a[0];
-            String chaine = aa.message("toString");
-            System.out.println(chaine);
-            return chaine;
+            System.out.println(a[0]);
+            return a[0];
         };
         systemClass.setMessage("afficher", afficher);
 
