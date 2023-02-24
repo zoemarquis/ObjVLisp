@@ -9,8 +9,7 @@ class RealiseObjVLisp implements ObjVLisp {
                 "Systeme"));
         systemClass.message(":message", "afficher",
                 (Message) (o, a) -> {
-                    UnObjet aa = (UnObjet) a[0];
-                    System.out.println((String) aa.message("toString"));
+                    System.out.println((String) ((OObjet) a[0]).message("toString"));
                     return a[0];
                 });
         return systemClass;
@@ -20,18 +19,15 @@ class RealiseObjVLisp implements ObjVLisp {
         OObjet entierClass = getClasse("Classe").message(":nouveau", Map.of("nomClasse",
                 "Entier", "nomsAttributs", List.of("valeur")));
         entierClass.message(":message", ":nouveau",
-                (Message) (o, a) -> {
-                    return entierClass.superMessage(":nouveau", Map.of("valeur", a[0]));
-                });
-        entierClass.message(":message", "+", (Message) (o, a) -> {
-            return entierClass.message(":nouveau",
-                    (Integer) o.message("valeur") + (Integer) ((OObjet) a[0]).message("valeur"));
-        });
-        entierClass.message(":message", "*", (Message) (o, a) -> {
-            return entierClass.message(":nouveau",
-                    (Integer) o.message("valeur") * (Integer) ((OObjet) a[0]).message("valeur"));
-        });
+                (Message) (o, a) -> entierClass.superMessage(":nouveau", Map.of("valeur", a[0])));
+        entierClass.message(":message", "+", (Message) (o, a) -> entierClass.message(":nouveau",
+                (Integer) o.message("valeur") + (Integer) ((OObjet) a[0]).message("valeur")));
+        entierClass.message(":message", "*", (Message) (o, a) -> entierClass.message(":nouveau",
+                (Integer) o.message("valeur") * (Integer) ((OObjet) a[0]).message("valeur")));
+        entierClass.message(":message", "/", (Message) (o, a) -> entierClass.message(":nouveau",
+                (Integer) o.message("valeur") / (Integer) ((OObjet) a[0]).message("valeur")));
         return entierClass;
+
     }
 
     private OObjet getChaineClass() {
