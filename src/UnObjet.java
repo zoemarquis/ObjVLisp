@@ -129,7 +129,12 @@ class UnObjet implements OObjet {
         }
         if (leMsg == null || classe == null)
             return null;
-        return classe.getMessage(nom);
+        leMsg = null;
+        while (leMsg == null && classe != null) {
+            leMsg = classe.getMessages().get(nom);
+            classe = classe.getSuperClasse();
+        }
+        return leMsg;
     }
 
     /**
