@@ -9,7 +9,8 @@ class RealiseObjVLisp implements ObjVLisp {
                 "Systeme"));
         systemClass.message(":message", "afficher",
                 (Message) (o, a) -> {
-                    System.out.println(a[0]);
+                    UnObjet aa = (UnObjet) a[0];
+                    System.out.println((String) aa.message("toString"));
                     return a[0];
                 });
         return systemClass;
@@ -19,9 +20,17 @@ class RealiseObjVLisp implements ObjVLisp {
         OObjet entierClass = getClasse("Classe").message(":nouveau", Map.of("nomClasse",
                 "Entier", "nomsAttributs", List.of("valeur")));
         entierClass.message(":message", ":nouveau",
-                (Message) (o, a) -> o.message(":valeur", a[0]));
-        // redéfinition de ":nouveau"
-        // on stocke maintenant juste un entier, pas une map passée en paramètres
+                (Message) (o, a) -> {
+                    return entierClass.superMessage(":nouveau", Map.of("valeur", a[0]));
+                });
+        entierClass.message(":message", "+", (Message) (o, a) -> {
+            return entierClass.message(":nouveau",
+                    (Integer) o.message("valeur") + (Integer) ((OObjet) a[0]).message("valeur"));
+        });
+        entierClass.message(":message", "*", (Message) (o, a) -> {
+            return entierClass.message(":nouveau",
+                    (Integer) o.message("valeur") * (Integer) ((OObjet) a[0]).message("valeur"));
+        });
         return entierClass;
     }
 
