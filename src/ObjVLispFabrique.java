@@ -141,20 +141,8 @@ class ObjVLispFabrique {
         };
         objetClass.setMessage("toString", toString);
 
-        UnObjet systemClass = metaClass.message(":nouveau", Map.of("nomClasse",
-                "Systeme"));
-        Message afficher = (o, a) -> {
-            System.out.println(a[0]);
-            return a[0];
-        };
-        systemClass.setMessage("afficher", afficher);
-
-        // entier
-        // chaine
-
         nosClasses.put("Classe", metaClass);
         nosClasses.put("Objet", objetClass);
-        nosClasses.put("Systeme", systemClass);
 
         return new RealiseObjVLisp(nosClasses);
     }
