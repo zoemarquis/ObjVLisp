@@ -100,7 +100,7 @@ class UnObjet implements OObjet {
         return (Map<String, Message>) info.get("messages");
     }
 
-    public Message getMessage(String nom) {
+    private Message getMessage(String nom) {
         Message leMsg = null;
         UnObjet c = (UnObjet) getClasse();
         if (estClasse())
@@ -111,17 +111,24 @@ class UnObjet implements OObjet {
                 c = c.getSuperClasse();
             }
         }
-        /*
-         * if (leMsg == null) { // inutile ?
-         * c = getSuperClasse();
-         * while (leMsg == null && c != null) {
-         * leMsg = c.getMessages().get(nom);
-         * c = c.getSuperClasse();
-         * }
-         * }
-         */
         return leMsg;
+    }
 
+    private Message getSuperMessage(String nom) {
+        Message leMsg = null;
+        UnObjet classe = (UnObjet) getClasse();
+        if (estClasse())
+            leMsg = getMessages().get(nom);
+
+        if (leMsg == null) {
+            while (leMsg == null && classe != null) {
+                leMsg = classe.getMessages().get(nom);
+                classe = classe.getSuperClasse();
+            }
+        }
+        if (leMsg == null || classe == null)
+            return null;
+        return classe.getMessage(nom);
     }
 
     /**
@@ -138,21 +145,22 @@ class UnObjet implements OObjet {
     @Override
     public <T> T message(String nom, Object... arguments) { // comment faire pour getter et setter ?
         Message leMsg = getMessage(nom);
-        if (leMsg == null) {
-            // error;
-            System.out.println(nom + " : Message introuvable");
-        }
+        if (leMsg == null)
+            return error("Ce message c'est pas défini pour cet objet.");
         return (T) leMsg.apply(this, arguments);
     }
 
     @Override
     public <T> T superMessage(String nom, Object... arguments) {
-        return (T) this;
+        Message leMsg = getSuperMessage(nom);
+        if (leMsg == null)
+            return error("Il n'y a pas de supermessage défini pour cet objet.");
+        return (T) leMsg.apply(this, arguments);
     }
 
     @Override
     public <T> T error(String cause) {
-        return (T) this;
+        return (T) new Error(cause);
     }
 
 }
