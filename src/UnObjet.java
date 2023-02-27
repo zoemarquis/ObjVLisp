@@ -168,4 +168,23 @@ class UnObjet implements OObjet {
         return (T) new Error(cause);
     }
 
+    private Map<String, Object> getMap() {
+        return info;
+    }
+
+    public boolean equals(Object o) {
+        UnObjet oo = (UnObjet) o;
+        Map<String, Object> oMap = oo.getMap();
+        for (String cle : info.keySet()) {
+            if (oMap.containsKey(cle)) {
+                if ((cle == "nomsAttributs" || cle == "methodes") && (!info.get(cle).equals(oMap.get(cle))))
+                    return false;
+                if (info.get(cle) != oMap.get(cle))
+                    return false;
+            } else
+                return false;
+        }
+        return info.size() == oMap.size();
+    }
+
 }
