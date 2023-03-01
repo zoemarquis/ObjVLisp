@@ -33,7 +33,7 @@ class ObjVLispFabrique {
         Message deuxPointsMessage = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             oo.setMessage((String) a[0], (Message) a[1]);
-            return 0; // ?
+            return true; // pour que le message soit déf (pas null (donc existe dans la map))
         };
         metaClass.setMessage(":message", deuxPointsMessage);
 
@@ -66,7 +66,7 @@ class ObjVLispFabrique {
                     msg.put(":" + s, (Message) (ob, arg) -> {
                         UnObjet oob = (UnObjet) ob;
                         oob.setInfo(s, arg[0]);
-                        return oob; // ?
+                        return true; // ?
                     });
                 }
             }
@@ -103,15 +103,19 @@ class ObjVLispFabrique {
             UnObjet oo = (UnObjet) o;
 
             ch.append("instance de la classe ");
-            ch.append(oo.getClasseFormeTextuelle());
+            ch.append(((UnObjet) oo.getInfo("classe")).getInfo("nomClasse"));
             ch.append("\n");
 
-            if (oo.estClasse()) {
+            if (oo.getInfo("nomClasse") != null) {
                 ch.append("classe ");
-                ch.append(oo.getNomClasse());
-                ch.append(" extends ");
-                ch.append(oo.getSuperClasseFormeTextuelle());
-                ch.append("\n");
+                ch.append(oo.getInfo("nomClasse"));
+
+                // si ce n'est pas Object, on met sa superClasse
+                if (!oo.getInfo("nomClasse").equals("Objet")) {
+                    ch.append(" extends ");
+                    ch.append(((UnObjet) oo.getInfo("superClasse")).getInfo("nomClasse"));
+                    ch.append("\n");
+                }
 
                 ch.append("ses attributs :\n");
                 for (String s : oo.getListAllAttributs()) {
@@ -119,13 +123,13 @@ class ObjVLispFabrique {
                 }
                 ch.append("\n");
                 ch.append("ses messages :\n");
-                for (String s : oo.getMessages().keySet()) {
+                for (String s : oo.getMapMessages().keySet()) {
                     ch.append("\t" + s);
                 }
                 ch.append("\n");
             } else {
 
-                UnObjet mere = (UnObjet) oo.getClasse();
+                UnObjet mere = (UnObjet) oo.getInfo("classe");
                 Object valeur = null;
                 for (String s : mere.getListAllAttributs()) {
                     if (!s.equals("classe")) {
@@ -140,6 +144,13 @@ class ObjVLispFabrique {
             return ch.toString();
         };
         objetClass.setMessage("toString", toString);
+
+        Message deuxPointsAccept = (o, a) -> {
+            for (String aa : (String[]) a)
+                o.message(":message", (String) aa, null);
+            return true; // pour que le message soit déf (pas null (donc existe dans la map))
+        };
+        metaClass.setMessage(":accept", deuxPointsAccept);
 
         nosClasses.put("Classe", metaClass);
         nosClasses.put("Objet", objetClass);
