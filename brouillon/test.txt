@@ -1,0 +1,12 @@
+ObjVLisp obj = ObjVLispFabrique.nouveau();
+OObjet metaClass = obj.getClasse("Classe");
+OObjet systemClass = obj.getClasse("Systeme");
+OObjet pointClass = metaClass.message(":nouveau", Map.of("nomClasse", "Point", "nomsAttributs", List.of("x", "y")));
+OObjet integerClass = obj.getClasse("Entier");
+OObjet dix = integerClass.message(":nouveau", 10);
+OObjet vingt = integerClass.message(":nouveau", 20);
+OObjet aPoint = pointClass.message(":nouveau", Map.of("x", dix, "y", vingt));
+OObjet anotherPoint = pointClass.message("nouveau");
+anotherPoint.message(":x", dix);
+anotherPoint.message(":y", vingt);
+!!!!systemClass.message("afficher", (Object) anotherPoint);
