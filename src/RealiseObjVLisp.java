@@ -1,9 +1,24 @@
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Classe qui réalise l'nterface qui représente le langage ObjVLisp.
+ * Instancie en ObjVLisp les classes Systeme, Entier et Chaine.
+ * Permet d'accéder aux classes natives du langage et à celles instanciées.
+ * 
+ * @author Zoé Marquis
+ * @author Enzo Nulli
+ * @version 1.0
+ */
 class RealiseObjVLisp implements ObjVLisp {
         private Map<String, OObjet> nosClasses;
 
+        /**
+         * Instancie la classe Système.
+         * Permet d'afficher des OObjet.
+         *
+         * @return OObjet la classe Système
+         */
         private OObjet getSystemClass() {
                 OObjet systemClass = getClasse("Classe").message(":nouveau", Map.of("nomClasse",
                                 "Systeme"));
@@ -15,6 +30,11 @@ class RealiseObjVLisp implements ObjVLisp {
                 return systemClass;
         }
 
+        /**
+         * Instancie la classe Entier.
+         *
+         * @return OObjet la classe Entier
+         */
         private OObjet getEntierClass() {
                 OObjet entierClass = getClasse("Classe").message(":nouveau", Map.of("nomClasse",
                                 "Entier", "nomsAttributs", List.of("valeur")));
@@ -29,7 +49,12 @@ class RealiseObjVLisp implements ObjVLisp {
                 return entierClass;
         }
 
-        // vérifier concaténation fonctionne
+        /**
+         * Instancie la classe Chaine.
+         *
+         * @return OObjet la classe Chaine
+         */
+        // vérifier concaténation fonctionne !!
         private OObjet getChaineClass() {
                 OObjet chaineClasse = getClasse("Classe").message(":nouveau", Map.of("nomClasse",
                                 "Chaine", "nomsAttributs", List.of("str")));
@@ -45,6 +70,11 @@ class RealiseObjVLisp implements ObjVLisp {
                 return nosClasses.get(nomDeClasse);
         }
 
+        /**
+         * Constructeur de la classe
+         * 
+         * @param nosClasses la map qui contient toutes les classes instanciées
+         */
         public RealiseObjVLisp(Map<String, OObjet> nosClasses) {
                 this.nosClasses = nosClasses;
                 nosClasses.put("Systeme", getSystemClass());

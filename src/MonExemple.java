@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Classe qui modélise des exemples qui montrent comment ObjVLisp marche
+ * Classe constituée d'exemples qui modélisent le fonctionnement d'ObjVLisp
  * 
  * @author Zoé Marquis
  * @author Enzo Nulli
@@ -10,6 +10,9 @@ import java.util.Map;
  */
 public class MonExemple {
 
+    /**
+     * L'exemple de Zoé Marquis.
+     */
     public static void exempleMarquis() {
         ObjVLisp obj = ObjVLispFabrique.nouveau();
         OObjet metaClass = obj.getClasse("Classe");
@@ -82,6 +85,9 @@ public class MonExemple {
         systemClass.message("afficher", (Object) monMarbre.message("tempsCuisson"));
     }
 
+    /**
+     * L'exemple d'Enzo Nulli.
+     */
     public static void exempleNulli() {
         ObjVLisp obj = ObjVLispFabrique.nouveau();
         OObjet metaClass = obj.getClasse("Classe");
@@ -127,6 +133,9 @@ public class MonExemple {
 
     }
 
+    /**
+     * L'exemple de DLB.
+     */
     public static void exempleDLB() {
         ObjVLisp obj = ObjVLispFabrique.nouveau();
         OObjet metaClass = obj.getClasse("Classe");
@@ -157,6 +166,9 @@ public class MonExemple {
 
     }
 
+    /**
+     * L'exemple de Nicolas Henocque.
+     */
     public static void groupeANicolasHenocque() {
         /* Base */
         ObjVLisp obj = ObjVLispFabrique.nouveau(); // On définie notre langage
@@ -241,6 +253,10 @@ public class MonExemple {
         assert zero.equals(resMonCercle); // 0 car non implémenté
     }
 
+    /**
+     * Création d'une hiérarchie pour représenter le type de données Booléens en
+     * langage objet.
+     */
     public static void booleen() {
         ObjVLisp obj = ObjVLispFabrique.nouveau();
         OObjet metaClass = obj.getClasse("Classe");
@@ -272,6 +288,11 @@ public class MonExemple {
         systemClass.message("afficher", (Object) falseInstance.message("et", 12));
     }
 
+    /**
+     * Lance tous les exemples.
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         exempleDLB();
         exempleMarquis();

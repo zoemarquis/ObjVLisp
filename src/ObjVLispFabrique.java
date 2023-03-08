@@ -3,6 +3,14 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * La fabrique du langage ObjVLisp
+ * 
+ * @author Zoé Marquis
+ * @author Enzo Nulli
+ * @version 1.0
+ */
+
 class ObjVLispFabrique {
     private ObjVLispFabrique() {
         // pas d'instanciation possible

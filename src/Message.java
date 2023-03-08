@@ -1,5 +1,5 @@
 /**
- * Interface pour appliquer des messages sur un OObjet
+ * Interface pour appliquer un message à un OObjet.
  * 
  * @author Zoé Marquis
  * @author Enzo Nulli
