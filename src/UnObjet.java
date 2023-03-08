@@ -31,10 +31,11 @@ class UnObjet implements OObjet {
         return (Map<String, Message>) getInfo("messages");
     }
 
+    // on n'arrive pas à null( car :message n'existe pas pour un objet terminal
+    // (objet qui n'est pas l'instance de Classe)
     public void setMessage(String nomMsg, Message leMsg) {
         if (getInfo("nomClasse") != null)
             getMapMessages().put(nomMsg, leMsg);
-        // else error ?
     }
 
     // recherche le msg

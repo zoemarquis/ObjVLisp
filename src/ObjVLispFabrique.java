@@ -33,7 +33,7 @@ class ObjVLispFabrique {
         Message deuxPointsMessage = (o, a) -> {
             UnObjet oo = (UnObjet) o;
             oo.setMessage((String) a[0], (Message) a[1]);
-            return true; // pour que le message soit déf (pas null (donc existe dans la map))
+            return null; // pour que le message soit déf (pas null (donc existe dans la map))
         };
         metaClass.setMessage(":message", deuxPointsMessage);
 
@@ -66,7 +66,7 @@ class ObjVLispFabrique {
                     msg.put(":" + s, (Message) (ob, arg) -> {
                         UnObjet oob = (UnObjet) ob;
                         oob.setInfo(s, arg[0]);
-                        return true; // ?
+                        return null; // ?
                     });
                 }
             }
@@ -128,14 +128,13 @@ class ObjVLispFabrique {
                 }
                 ch.append("\n");
             } else {
-
                 UnObjet mere = (UnObjet) oo.getInfo("classe");
                 Object valeur = null;
                 for (String s : mere.getListAllAttributs()) {
                     if (!s.equals("classe")) {
                         ch.append(s);
                         ch.append(" = ");
-                        valeur = o.message(s);
+                        valeur = o.message(s); // ici faire to String aussi
                         ch.append((valeur != null) ? (valeur.toString()) : ("null"));
                         ch.append("\n");
                     }
@@ -146,9 +145,9 @@ class ObjVLispFabrique {
         objetClass.setMessage("toString", toString);
 
         Message deuxPointsAccept = (o, a) -> {
-            for (String aa : (String[]) a)
-                o.message(":message", (String) aa, null);
-            return true; // pour que le message soit déf (pas null (donc existe dans la map))
+            for (Object aa : a)
+                o.message(":message", (String) aa, (Message) (ooo, aaa) -> null);
+            return null; // pour que le message soit déf (pas null (donc existe dans la map))
         };
         metaClass.setMessage(":accept", deuxPointsAccept);
 

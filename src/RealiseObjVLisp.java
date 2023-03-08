@@ -40,20 +40,6 @@ class RealiseObjVLisp implements ObjVLisp {
                 return chaineClasse;
         }
 
-        private OObjet getBooleenClass() {
-                OObjet booleenClass = getClasse("Classe").message(":nouveau", Map.of("nomClasse",
-                                "Booleen", "nomsAttributs", List.of("etat")));
-                booleenClass.message(":message", ":nouveau",
-                                (Message) (o, a) -> booleenClass.superMessage(":nouveau", Map.of("etat", a[0])));
-                booleenClass.message(":message", "non", (Message) (o, a) -> booleenClass.message(":nouveau",
-                                (Boolean) (!((Boolean) o.message("etat")))));
-                booleenClass.message(":message", "ou", (Message) (o, a) -> booleenClass.message(":nouveau",
-                                (Boolean) o.message("etat") || (Boolean) ((OObjet) a[0]).message("etat")));
-                booleenClass.message(":message", "et", (Message) (o, a) -> booleenClass.message(":nouveau",
-                                (Boolean) o.message("etat") && (Boolean) ((OObjet) a[0]).message("etat")));
-                return booleenClass;
-        }
-
         @Override
         public OObjet getClasse(String nomDeClasse) {
                 return nosClasses.get(nomDeClasse);
@@ -64,6 +50,5 @@ class RealiseObjVLisp implements ObjVLisp {
                 nosClasses.put("Systeme", getSystemClass());
                 nosClasses.put("Entier", getEntierClass());
                 nosClasses.put("Chaine", getChaineClass());
-                nosClasses.put("Booleen", getBooleenClass());
         }
 }

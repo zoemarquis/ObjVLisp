@@ -1,6 +1,13 @@
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Classe qui modélise des exemples qui montrent comment ObjVLisp marche
+ * 
+ * @author Zoé Marquis
+ * @author Enzo Nulli
+ * @version 1.0
+ */
 public class MonExemple {
 
     public static void exempleMarquis() {
@@ -150,9 +157,126 @@ public class MonExemple {
 
     }
 
+    public static void groupeANicolasHenocque() {
+        /* Base */
+        ObjVLisp obj = ObjVLispFabrique.nouveau(); // On définie notre langage
+
+        OObjet metaClass = obj.getClasse("Classe"); // Méta-classe
+        OObjet systemClass = obj.getClasse("Systeme"); // Classe induite Système
+        OObjet integerClass = obj.getClasse("Entier"); // Classe induite Entier
+
+        /* Debug */
+        systemClass.message("afficher", (Object) integerClass); // On vérifie que la classe Entier
+                                                                // est initialisée
+
+        /* Objets (Entiers) */
+        OObjet zero = integerClass.message(":nouveau", 0);
+        OObjet un = integerClass.message(":nouveau", 1);
+        OObjet deux = integerClass.message(":nouveau", 2);
+        OObjet trois = integerClass.message(":nouveau", 3);
+        OObjet quatre = integerClass.message(":nouveau", 4);
+        OObjet cinq = integerClass.message(":nouveau", 5);
+        OObjet six = integerClass.message(":nouveau", 6);
+        OObjet neuf = integerClass.message(":nouveau", 9);
+
+        /* Mes propres classes */
+        // Point (x, y)
+        OObjet pointClass = metaClass.message(":nouveau",
+                Map.of("nomClasse", "Point", "nomsAttributs", List.of("x", "y")));
+
+        // Forme
+        OObjet formeClass = metaClass.message(":nouveau", Map.of("nomClasse", "Forme"));
+
+        // [Forme] surface() -> Retourne la surface de la forme (par défaut, zéro)
+        formeClass.message(":message", "surface", (Message) (o, a) -> zero);
+
+        // Rectangle (père: Forme)
+        OObjet rectangleClass = metaClass.message(":nouveau", Map.of("nomClasse", "Rectangle",
+                "nomsAttributs", List.of("longueur", "largeur"), "superClasse", formeClass));
+
+        // [Rectangle] surface() -> longueur * largeur
+        rectangleClass.message(":message", "surface",
+                (Message) (o, a) -> ((OObjet) o.message("longueur")).message("*",
+                        ((OObjet) o.message("largeur"))));
+
+        // Carré (père: Rectangle, fils de Forme)
+        OObjet carreClass = metaClass.message(":nouveau", Map.of("nomClasse", "Carré",
+                "nomsAttributs", List.of("cote"), "superClasse", rectangleClass));
+
+        // [Carré] surface() -> cote * cote
+        carreClass.message(":message", "surface", (Message) (o, a) -> ((OObjet) o.message("cote"))
+                .message("*", ((OObjet) o.message("cote"))));
+
+        // Cercle (père: Forme)
+        OObjet cercleClass = metaClass.message(":nouveau", Map.of("nomClasse", "Cercle",
+                "nomsAttributs", List.of("centre", "rayon"), "superClasse", formeClass));
+
+        // [Cercle] surface() -> Test: non implémenté
+        formeClass.message(":message", "surface",
+                (Message) (o, a) -> zero);
+
+        /* Objets (classes) */
+        // Rectangle
+        OObjet monRect = rectangleClass.message(":nouveau", Map.of("longueur", deux, "largeur", trois));
+        Object resMonRect = monRect.message("surface");
+        assert six.equals(resMonRect); // 2 * 3 = 6 ?
+
+        // Rectangle 2
+        OObjet monRect2 = rectangleClass.message(":nouveau", Map.of("longueur", un, "largeur", un));
+        Object resMonRect2 = monRect2.message("surface");
+        assert un.equals(resMonRect2); // 1 * 1 = 1 ?
+
+        // On vérifie que les pointeurs des deux rectangles sont différents
+        assert !(monRect.equals(monRect2));
+
+        // Carré
+        OObjet monCarre = carreClass.message(":nouveau", Map.of("cote", trois));
+        Object resMonCarre = monCarre.message("surface");
+        assert neuf.equals(resMonCarre); // 3 * 3 = 9 ?
+
+        // Cercle
+        OObjet monCentre = pointClass.message(":nouveau", Map.of("x", cinq, "y", quatre));
+        OObjet monCercle = cercleClass.message(":nouveau", Map.of("centre", monCentre, "rayon", deux));
+        Object resMonCercle = monCercle.message("surface");
+        assert zero.equals(resMonCercle); // 0 car non implémenté
+    }
+
+    public static void booleen() {
+        ObjVLisp obj = ObjVLispFabrique.nouveau();
+        OObjet metaClass = obj.getClasse("Classe");
+        OObjet systemClass = obj.getClasse("Systeme");
+
+        OObjet booleenClass = metaClass.message(":nouveau", Map.of("nomClasse", "Booleen"));
+        booleenClass.message(":accept", "non", "et", "ou");
+
+        OObjet trueClass = metaClass.message(":nouveau",
+                Map.of("nomClasse", "True", "nomsAttributs", List.of("bool"), "superClasse", booleenClass));
+
+        OObjet falseClass = metaClass.message(":nouveau",
+                Map.of("nomClasse", "False", "nomsAttributs", List.of("bool"), "superClasse", booleenClass));
+
+        OObjet trueInstance = trueClass.message(":nouveau", Map.of("bool", true));
+
+        OObjet falseInstance = falseClass.message(":nouveau", Map.of("bool", false));
+
+        trueClass.message(":message", "non", (Message) (o, a) -> falseInstance);
+        trueClass.message(":message", "ou", (Message) (o, a) -> trueInstance);
+        trueClass.message(":message", "et", (Message) (o, a) -> a[0]);
+
+        falseClass.message(":message", "non", (Message) (o, a) -> trueInstance);
+        falseClass.message(":message", "ou", (Message) (o, a) -> a[0]);
+        falseClass.message(":message", "et", (Message) (o, a) -> falseInstance);
+
+        systemClass.message("afficher", (Object) trueInstance.message("non"));
+        systemClass.message("afficher", (Object) trueInstance.message("ou", "bonjour"));
+        systemClass.message("afficher", (Object) falseInstance.message("et", 12));
+    }
+
     public static void main(String[] args) {
         exempleDLB();
         exempleMarquis();
         exempleNulli();
+        groupeANicolasHenocque();
+        booleen();
     }
 }
